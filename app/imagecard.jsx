@@ -1,8 +1,14 @@
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState, useContext } from "react";
-import { View, StyleSheet, ImageBackground } from "react-native";
-import { TouchableOpacity, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import { ImageContext } from "./ImageContext";
+import { Ionicons } from "@expo/vector-icons"; // Assuming you're already using this for other icons
 
 export default function ImageCard() {
   const params = useLocalSearchParams();
@@ -10,6 +16,7 @@ export default function ImageCard() {
   const { images } = useContext(ImageContext);
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   useEffect(() => {
     if (imageIndex !== undefined) {
@@ -28,6 +35,8 @@ export default function ImageCard() {
       }
       return prev; // stay the same if next index is invalid
     });
+    // Reset zoom when changing images
+    setIsZoomed(false);
   };
 
   const decreaseIndex = () => {
@@ -38,6 +47,12 @@ export default function ImageCard() {
       }
       return prev; // stay the same if previous index is invalid
     });
+    // Reset zoom when changing images
+    setIsZoomed(false);
+  };
+
+  const toggleZoom = () => {
+    setIsZoomed(!isZoomed);
   };
 
   const imageSource = images[currentIndex]?.url;
@@ -45,7 +60,11 @@ export default function ImageCard() {
   return (
     <View style={styles.container}>
       {imageSource && (
-        <ImageBackground source={imageSource} style={styles.image}>
+        <ImageBackground
+          source={imageSource}
+          style={[styles.image, isZoomed && styles.zoomedImage]}
+          imageStyle={isZoomed ? styles.zoomedImageStyle : null}
+        >
           {/* Left Button */}
           <TouchableOpacity style={styles.leftButton} onPress={decreaseIndex}>
             <Text style={styles.buttonText}>{"<"}</Text>
@@ -54,6 +73,15 @@ export default function ImageCard() {
           {/* Right Button */}
           <TouchableOpacity style={styles.rightButton} onPress={increaseIndex}>
             <Text style={styles.buttonText}>{">"}</Text>
+          </TouchableOpacity>
+
+          {/* Zoom Button */}
+          <TouchableOpacity style={styles.zoomButton} onPress={toggleZoom}>
+            <Ionicons
+              name={isZoomed ? "contract-outline" : "expand-outline"}
+              size={24}
+              color="#fff"
+            />
           </TouchableOpacity>
         </ImageBackground>
       )}
@@ -71,6 +99,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  zoomedImage: {
+    // Container style remains the same
+  },
+  zoomedImageStyle: {
+    // This affects the actual image rendering within the ImageBackground
+    transform: [{ scale: 3 }], // 150% zoom
+    resizeMode: "contain",
+  },
   leftButton: {
     position: "absolute",
     left: 20,
@@ -79,6 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     padding: 10,
     borderRadius: 25,
+    zIndex: 10, // Ensure buttons remain on top
   },
   rightButton: {
     position: "absolute",
@@ -88,6 +125,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     padding: 10,
     borderRadius: 25,
+    zIndex: 10, // Ensure buttons remain on top
+  },
+  zoomButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10,
+    borderRadius: 25,
+    zIndex: 10, // Ensure buttons remain on top
   },
   buttonText: {
     color: "#fff",
