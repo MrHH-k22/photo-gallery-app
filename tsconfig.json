@@ -3,15 +3,18 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "app/ImageList.jsx",
+    "app/index.jsx",
+    "app/imagecard.jsx",
+    "app/FloatingActionButton.jsx",
+    "app/_layout.jsx"
   ]
 }
