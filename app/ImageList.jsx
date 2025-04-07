@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   TouchableOpacity,
   View,
@@ -6,8 +6,8 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import Images from "./Images";
 import { useNavigation } from "@react-navigation/native";
+import { ImageContext } from "./ImageContext"; // We'll create this next
 
 let deviceHeight = Dimensions.get("window").height;
 let deviceWidth = Dimensions.get("window").width;
@@ -28,10 +28,11 @@ const styles = StyleSheet.create({
 
 export default function ImageList() {
   const navigation = useNavigation();
+  const { images } = useContext(ImageContext);
 
   return (
     <View style={styles.container}>
-      {Images.map((image, index) => (
+      {images.map((image, index) => (
         <TouchableOpacity
           key={index}
           onPress={() => {

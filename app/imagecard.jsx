@@ -1,12 +1,13 @@
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { View, StyleSheet, ImageBackground } from "react-native";
-import Images from "./Images"; // Import your Images array
 import { TouchableOpacity, Text } from "react-native";
+import { ImageContext } from "./ImageContext";
 
 export default function ImageCard() {
   const params = useLocalSearchParams();
   const { imageIndex } = params;
+  const { images } = useContext(ImageContext);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -22,7 +23,7 @@ export default function ImageCard() {
   const increaseIndex = () => {
     setCurrentIndex((prev) => {
       const nextIndex = prev + 1;
-      if (nextIndex < Images.length && Images[nextIndex]?.url) {
+      if (nextIndex < images.length && images[nextIndex]?.url) {
         return nextIndex;
       }
       return prev; // stay the same if next index is invalid
@@ -32,15 +33,14 @@ export default function ImageCard() {
   const decreaseIndex = () => {
     setCurrentIndex((prev) => {
       const prevIndex = prev - 1;
-      if (prevIndex >= 0 && Images[prevIndex]?.url) {
+      if (prevIndex >= 0 && images[prevIndex]?.url) {
         return prevIndex;
       }
       return prev; // stay the same if previous index is invalid
     });
   };
 
-  // const imageSource = Images[imageIndex].url;
-  const imageSource = Images[currentIndex]?.url;
+  const imageSource = images[currentIndex]?.url;
 
   return (
     <View style={styles.container}>

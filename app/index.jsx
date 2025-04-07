@@ -1,11 +1,12 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
+import { useNavigation } from "@react-navigation/native";
 import ImageList from "./ImageList";
 import FloatingActionButton from "./FloatingActionButton";
+import { ImageProvider } from "./ImageContext";
 
 export default function Index() {
-  const navigation = useNavigation(); // Use the hook to get the navigation object
+  const navigation = useNavigation();
 
   const handleSelectedImage = (imageUrl) => {
     navigation.navigate("ImageCard", { image: imageUrl });

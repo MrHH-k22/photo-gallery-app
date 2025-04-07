@@ -1,5 +1,9 @@
+import { useState, useEffect } from "react";
+import { Alert } from "react-native";
+import * as FileSystem from "expo-file-system";
+
 // Initial image array
-const imageArray = [
+const initialImages = [
   { url: require("../assets/images/image1.jpg") },
   { url: require("../assets/images/image2.jpg") },
   { url: require("../assets/images/image3.jpg") },
@@ -19,12 +23,51 @@ const imageArray = [
   { url: require("../assets/images/image17.jpg") },
 ];
 
-// Create an object that includes both the array and methods to manipulate it
-const Images = [...imageArray];
+// Create custom hook for image state management
+export function useImages() {
+  const [images, setImages] = useState(initialImages);
 
-// Add method to add new images
+  // Add method to add new images
+  const addImage = (imageUri) => {
+    // Create a copy of the image to the app's documents directory for persistence
+    const persistImage = async (uri) => {
+      try {
+        const fileName = uri.split("/").pop();
+        const newPath = FileSystem.documentDirectory + fileName;
+        await FileSystem.copyAsync({
+          from: uri,
+          to: newPath,
+        });
+
+        // Add the new image to the state
+        setImages((currentImages) => [
+          ...currentImages,
+          { url: { uri: newPath } },
+        ]);
+      } catch (error) {
+        Alert.alert("Error", "Failed to save image: " + error.message);
+      }
+    };
+
+    persistImage(imageUri);
+  };
+
+  return {
+    images,
+    addImage,
+  };
+}
+
+// For backward compatibility
+const Images = [...initialImages];
 Images.addImage = function (image) {
+  // This will only work temporarily until page refresh
   this.push(image);
+
+  // Log warning
+  console.warn(
+    "Warning: directly modifying Images array will not persist changes or trigger UI updates. Use useImages hook instead."
+  );
 };
 
 export default Images;

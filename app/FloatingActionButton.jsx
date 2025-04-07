@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import Images from "./Images"; // Import the Images array
+import { ImageContext } from "./ImageContext";
 
 export default function FloatingActionButton() {
   const [open, setOpen] = useState(false);
+  const { addImage } = useContext(ImageContext);
 
   // Function to request camera permissions
   const requestCameraPermission = async () => {
@@ -44,7 +45,7 @@ export default function FloatingActionButton() {
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        addImageToGallery(result.assets[0].uri);
+        addImage(result.assets[0].uri);
       }
     }
     setOpen(false);
@@ -61,25 +62,10 @@ export default function FloatingActionButton() {
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        addImageToGallery(result.assets[0].uri);
+        addImage(result.assets[0].uri);
       }
     }
     setOpen(false);
-  };
-
-  // Function to add image to Images.js
-  const addImageToGallery = (uri) => {
-    // Since we can't directly modify the imported array (it's readonly),
-    // we'll need to use a method to add the image
-    if (typeof Images.addImage === "function") {
-      Images.addImage({ url: { uri } });
-      Alert.alert("Success", "Image added to gallery successfully");
-    } else {
-      Alert.alert(
-        "Error",
-        "Unable to add image to gallery. Images module needs to be updated."
-      );
-    }
   };
 
   return (
