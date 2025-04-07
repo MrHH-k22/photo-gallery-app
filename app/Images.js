@@ -1,4 +1,5 @@
-export default Images = [
+// Initial image array
+const imageArray = [
   { url: require("../assets/images/image1.jpg") },
   { url: require("../assets/images/image2.jpg") },
   { url: require("../assets/images/image3.jpg") },
@@ -17,3 +18,13 @@ export default Images = [
   { url: require("../assets/images/image16.jpg") },
   { url: require("../assets/images/image17.jpg") },
 ];
+
+// Create an object that includes both the array and methods to manipulate it
+const Images = [...imageArray];
+
+// Add method to add new images
+Images.addImage = function (image) {
+  this.push(image);
+};
+
+export default Images;
