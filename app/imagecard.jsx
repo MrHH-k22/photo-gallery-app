@@ -40,7 +40,7 @@ export default function ImageCard() {
   };
 
   // const imageSource = Images[imageIndex].url;
-  const imageSource = Images[imageIndex].url;
+  const imageSource = Images[currentIndex]?.url;
 
   return (
     <View style={styles.container}>
