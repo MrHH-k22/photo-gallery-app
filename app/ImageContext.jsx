@@ -3,70 +3,171 @@ import { Alert } from "react-native";
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Initial image array with bundled assets
+// Initial image array with bundled assets - ensure unique IDs
 const initialImages = [
-  { url: require("../assets/images/image1.jpg") },
-  { url: require("../assets/images/image2.jpg") },
-  { url: require("../assets/images/image3.jpg") },
-  { url: require("../assets/images/image4.jpg") },
-  { url: require("../assets/images/image5.jpg") },
-  { url: require("../assets/images/image6.jpg") },
-  { url: require("../assets/images/image7.jpg") },
-  { url: require("../assets/images/image8.jpg") },
-  { url: require("../assets/images/image9.jpg") },
-  { url: require("../assets/images/image10.jpg") },
-  { url: require("../assets/images/image11.jpg") },
-  { url: require("../assets/images/image12.jpg") },
-  { url: require("../assets/images/image13.jpg") },
-  { url: require("../assets/images/image14.jpg") },
-  { url: require("../assets/images/image15.jpg") },
-  { url: require("../assets/images/image16.jpg") },
-  { url: require("../assets/images/image17.jpg") },
+  {
+    id: "default-1",
+    url: require("../assets/images/image1.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-2",
+    url: require("../assets/images/image2.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-3",
+    url: require("../assets/images/image3.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-4",
+    url: require("../assets/images/image4.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-5",
+    url: require("../assets/images/image5.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-6",
+    url: require("../assets/images/image6.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-7",
+    url: require("../assets/images/image7.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-8",
+    url: require("../assets/images/image8.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-9",
+    url: require("../assets/images/image9.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-10",
+    url: require("../assets/images/image10.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-11",
+    url: require("../assets/images/image11.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-12",
+    url: require("../assets/images/image12.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-13",
+    url: require("../assets/images/image13.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-14",
+    url: require("../assets/images/image14.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-15",
+    url: require("../assets/images/image15.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-16",
+    url: require("../assets/images/image16.jpg"),
+    isFavorite: false,
+  },
+  {
+    id: "default-17",
+    url: require("../assets/images/image17.jpg"),
+    isFavorite: false,
+  },
 ];
 
 // Create context
 export const ImageContext = createContext();
 
-// Storage key for saved images
-const STORAGE_KEY = "gallery_custom_images";
+// Storage keys
+const STORAGE_KEY_IMAGES = "gallery_custom_images";
+const STORAGE_KEY_FAVORITES = "gallery_favorites";
 
 export const ImageProvider = ({ children }) => {
   const [images, setImages] = useState(initialImages);
   const [customImages, setCustomImages] = useState([]);
 
-  // Load custom images on startup
+  // Load custom images and favorites on startup
   useEffect(() => {
-    const loadSavedImages = async () => {
+    const loadSavedData = async () => {
       try {
-        const savedImagesJson = await AsyncStorage.getItem(STORAGE_KEY);
+        // Load custom images
+        const savedImagesJson = await AsyncStorage.getItem(STORAGE_KEY_IMAGES);
+        let validCustomImages = [];
+
         if (savedImagesJson) {
           const savedImages = JSON.parse(savedImagesJson);
 
-          // Check if saved image files still exist
-          const validImages = [];
+          // Ensure each saved image has a valid ID
           for (const image of savedImages) {
             const fileInfo = await FileSystem.getInfoAsync(image.url.uri);
             if (fileInfo.exists) {
-              validImages.push(image);
+              // If image doesn't have an ID, assign one
+              if (!image.id) {
+                image.id = `custom-${Date.now()}-${Math.random()
+                  .toString(36)
+                  .substr(2, 9)}`;
+              }
+              validCustomImages.push(image);
             }
           }
-
-          setCustomImages(validImages);
-          setImages([...initialImages, ...validImages]);
         }
+
+        // Load favorites
+        const favoritesJson = await AsyncStorage.getItem(STORAGE_KEY_FAVORITES);
+        let favorites = [];
+        if (favoritesJson) {
+          favorites = JSON.parse(favoritesJson);
+        }
+
+        // Apply favorites to default images
+        const updatedDefaultImages = initialImages.map((img) => ({
+          ...img,
+          isFavorite: favorites.includes(img.id),
+        }));
+
+        // Apply favorites to custom images
+        validCustomImages = validCustomImages.map((img) => ({
+          ...img,
+          isFavorite: favorites.includes(img.id),
+        }));
+
+        setImages([...updatedDefaultImages, ...validCustomImages]);
+        setCustomImages(validCustomImages);
       } catch (error) {
-        console.error("Failed to load saved images", error);
+        console.error("Failed to load saved data", error);
+        // If loading fails, at least set the initial images
+        setImages(initialImages);
       }
     };
 
-    loadSavedImages();
+    loadSavedData();
   }, []);
 
   // Save custom images when they change
   useEffect(() => {
     const saveImages = async () => {
       try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(customImages));
+        await AsyncStorage.setItem(
+          STORAGE_KEY_IMAGES,
+          JSON.stringify(customImages)
+        );
       } catch (error) {
         console.error("Failed to save images", error);
       }
@@ -77,11 +178,34 @@ export const ImageProvider = ({ children }) => {
     }
   }, [customImages]);
 
+  // Save favorites when they change
+  useEffect(() => {
+    const saveFavorites = async () => {
+      try {
+        const favorites = images
+          .filter((img) => img.isFavorite)
+          .map((img) => img.id);
+
+        await AsyncStorage.setItem(
+          STORAGE_KEY_FAVORITES,
+          JSON.stringify(favorites)
+        );
+      } catch (error) {
+        console.error("Failed to save favorites", error);
+      }
+    };
+
+    saveFavorites();
+  }, [images]);
+
   // Function to add a new image
   const addImage = async (uri) => {
     try {
-      // Create a unique filename
-      const fileName = `custom_image_${Date.now()}.jpg`;
+      // Create a unique filename and ID with timestamp and random string
+      const uniqueId = `custom-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      const fileName = `image_${uniqueId}.jpg`;
       const newPath = FileSystem.documentDirectory + fileName;
 
       // Copy the image to app's document directory
@@ -90,7 +214,11 @@ export const ImageProvider = ({ children }) => {
         to: newPath,
       });
 
-      const newImage = { url: { uri: newPath } };
+      const newImage = {
+        id: uniqueId,
+        url: { uri: newPath },
+        isFavorite: false,
+      };
 
       // Update state
       setCustomImages((prev) => [...prev, newImage]);
@@ -102,8 +230,32 @@ export const ImageProvider = ({ children }) => {
     }
   };
 
+  // Function to toggle favorite status
+  const toggleFavorite = (id) => {
+    if (!id) return; // Skip if no ID is provided
+
+    setImages((prev) =>
+      prev.map((img) =>
+        img.id === id ? { ...img, isFavorite: !img.isFavorite } : img
+      )
+    );
+
+    // Also update customImages if it's a custom image
+    setCustomImages((prev) =>
+      prev.map((img) =>
+        img.id === id ? { ...img, isFavorite: !img.isFavorite } : img
+      )
+    );
+  };
+
   return (
-    <ImageContext.Provider value={{ images, addImage }}>
+    <ImageContext.Provider
+      value={{
+        images,
+        addImage,
+        toggleFavorite,
+      }}
+    >
       {children}
     </ImageContext.Provider>
   );

@@ -3,7 +3,6 @@ import { ScrollView, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ImageList from "./ImageList";
 import FloatingActionButton from "./FloatingActionButton";
-import { ImageProvider } from "./ImageContext";
 
 export default function Index() {
   const navigation = useNavigation();
